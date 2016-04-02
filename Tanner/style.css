@@ -1,0 +1,101 @@
+﻿ body {
+        background:#F6F7FA;
+        margin: 20px;
+        font-family: "Segoe UI", sans-serif;
+        webkit-text-size-adjust: none;
+
+    }
+    
+    #wrapper {
+        max-width:768px;
+        margin:40px auto;}
+    
+    #header {
+        margin:20px 0;
+        width:100%;
+        overflow: auto;
+    }
+
+    .card {
+        background-color:#fff;
+        padding:20px 20px 10px 20px ;
+        -webkit-box-shadow: 0px 10px 1px 0px rgba(0,0,0,0.15);
+        -moz-box-shadow: 0px 1px 1px 0px rgba(0,0,0,0.15);
+        box-shadow: 0px 1px 1px 0px rgba(0,0,0,0.15);
+    }
+
+    .container { 
+        width:100%;
+        overflow: auto;
+        margin-bottom:2em;
+    
+    }
+    .bot-header {
+        display:inline-block;
+        margin-left:16px;
+    }
+
+    a {
+        color: #3E92D2;
+        text-decoration: none;
+    }
+    a:hover {
+        color: #3E92D2;
+        text-decoration: underline;
+    }
+
+
+
+    img.build-logo {height:18px;display:inline-block;float:right;margin-top:2px;}
+    img.microsoft-logo {height:22px;display:inline-block;float:left}
+    img.bot-icon {height:62px;width:62px;border-radius: 70%;float:left;}
+
+    h2 {
+      font-size: 34px;
+      margin:-4px 0 0 0;padding:0;
+      font-weight:400;
+
+    }
+ 
+    p {font-size:15px; line-height: 1.5em;margin:0 0 1em 0;}
+p.bf-link {margin-bottom:2em;margin-top:1em ;}
+p.bf-link a {font-weight:600;}
+
+    p.meta {font-size:13px;padding:0;margin:0;color:#999;line-heigh:1em;}    
+
+    p.legal {font-size:13px;color:#ccc;margin-top:2em;}
+    p.legal a {padding:0 8px;}
+    p.legal a:first-child {padding-left:0;}
+    p.legal a:last-child {padding-right:0;}
+
+    .footer {font-size:13px;color:#666;text-align: center;margin-top:5em;}
+
+/* Channels */
+
+.channel-info .channel {
+    background-color: #F6F7F8;
+}
+
+
+/* fonts from botframework.net */
+        @font-face {
+  font-family: "Segoe UI";
+  src: url("http://bot-framework.azureedge.net/fonts/SegoeUI-Normal/latest.eot");
+  src: url("http://bot-framework.azureedge.net/fonts/SegoeUI-Normal/latest.eot?") format("embedded-opentype"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Normal/latest.woff") format("woff"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Normal/latest.ttf") format("truetype"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Normal/latest.svg#web") format("svg");
+  font-style: normal;
+  font-weight: normal;
+}
+@font-face {
+  font-family: "Segoe UI Semilight";
+  src: url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semilight/latest.eot");
+  src: url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semilight/latest.eot?") format("embedded-opentype"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semilight/latest.woff") format("woff"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semilight/latest.ttf") format("truetype"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semilight/latest.svg#web") format("svg");
+  font-style: normal;
+  font-weight: normal;
+}
+@font-face {
+  font-family: "Segoe UI Semibold";
+  src: url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semibold/latest.eot");
+  src: url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semibold/latest.eot?") format("embedded-opentype"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semibold/latest.woff") format("woff"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semibold/latest.ttf") format("truetype"), url("http://bot-framework.azureedge.net/fonts/SegoeUI-Semibold/latest.svg#web") format("svg");
+  font-style: normal;
+  font-weight: normal;
+}
