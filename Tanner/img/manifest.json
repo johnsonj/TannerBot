@@ -1,0 +1,42 @@
+{
+	"name": "TannerBot",
+	"icons": [
+		{
+			"src": "\/img\/android-chrome-36x36.png?v=PYY7lLn2ja",
+			"sizes": "36x36",
+			"type": "image\/png",
+			"density": 0.75
+		},
+		{
+			"src": "\/img\/android-chrome-48x48.png?v=PYY7lLn2ja",
+			"sizes": "48x48",
+			"type": "image\/png",
+			"density": 1
+		},
+		{
+			"src": "\/img\/android-chrome-72x72.png?v=PYY7lLn2ja",
+			"sizes": "72x72",
+			"type": "image\/png",
+			"density": 1.5
+		},
+		{
+			"src": "\/img\/android-chrome-96x96.png?v=PYY7lLn2ja",
+			"sizes": "96x96",
+			"type": "image\/png",
+			"density": 2
+		},
+		{
+			"src": "\/img\/android-chrome-144x144.png?v=PYY7lLn2ja",
+			"sizes": "144x144",
+			"type": "image\/png",
+			"density": 3
+		},
+		{
+			"src": "\/img\/android-chrome-192x192.png?v=PYY7lLn2ja",
+			"sizes": "192x192",
+			"type": "image\/png",
+			"density": 4
+		}
+	],
+	"display": "standalone"
+}

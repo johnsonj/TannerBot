@@ -101,6 +101,35 @@
   <ItemGroup>
     <Content Include="default.htm" />
     <Content Include="Global.asax" />
+    <Content Include="img\android-chrome-144x144.png" />
+    <Content Include="img\android-chrome-192x192.png" />
+    <Content Include="img\android-chrome-36x36.png" />
+    <Content Include="img\android-chrome-48x48.png" />
+    <Content Include="img\android-chrome-72x72.png" />
+    <Content Include="img\android-chrome-96x96.png" />
+    <Content Include="img\apple-touch-icon-114x114.png" />
+    <Content Include="img\apple-touch-icon-120x120.png" />
+    <Content Include="img\apple-touch-icon-144x144.png" />
+    <Content Include="img\apple-touch-icon-152x152.png" />
+    <Content Include="img\apple-touch-icon-180x180.png" />
+    <Content Include="img\apple-touch-icon-57x57.png" />
+    <Content Include="img\apple-touch-icon-60x60.png" />
+    <Content Include="img\apple-touch-icon-72x72.png" />
+    <Content Include="img\apple-touch-icon-76x76.png" />
+    <Content Include="img\apple-touch-icon-precomposed.png" />
+    <Content Include="img\apple-touch-icon.png" />
+    <Content Include="img\browserconfig.xml" />
+    <Content Include="img\favicon-16x16.png" />
+    <Content Include="img\favicon-194x194.png" />
+    <Content Include="img\favicon-32x32.png" />
+    <Content Include="img\favicon-96x96.png" />
+    <Content Include="img\favicon.ico" />
+    <Content Include="img\mstile-144x144.png" />
+    <Content Include="img\mstile-150x150.png" />
+    <Content Include="img\mstile-310x150.png" />
+    <Content Include="img\mstile-310x310.png" />
+    <Content Include="img\mstile-70x70.png" />
+    <Content Include="img\safari-pinned-tab.svg" />
     <Content Include="img\tannerbot.jpg" />
     <Content Include="style.css" />
     <Content Include="Web.config" />
@@ -119,6 +148,7 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <Content Include=".gitignore" />
+    <Content Include="img\manifest.json" />
     <None Include="Properties\PublishProfiles\TannerBot - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -126,7 +156,9 @@
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
-    <None Include="Web.secrets.config" />
+    <Content Include="Web.secrets.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>
