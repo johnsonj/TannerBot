@@ -27,6 +27,26 @@
             @Html.DisplayFor(model => model.PhoneNumber)
         </dd>
 
+        <dt>
+            RSVP Status
+        </dt>
+        @if (Model.MainRSVP == null)
+        {
+            <dd>Not yet responded.</dd>
+        }
+        else
+        {
+            if(Model.MainRSVP.is_coming)
+            {
+                <dd>Responded and planning to attend.</dd>
+                <dt>Dinner Option</dt>
+                <dd>@Model.MainRSVP.dinner_option.PlateOption.ToString()</dd>
+            }
+            else
+            {
+                <dd>Responded and not attending.</dd>
+            }
+        }
     </dl>
 </div>
 <p>

@@ -7,6 +7,7 @@ using Microsoft.Bot.Connector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Tanner.Persistence
@@ -16,6 +17,7 @@ namespace Tanner.Persistence
     {
         public Forms.Person person;
         public Forms.DinnerOption dinner_option;
+        public bool is_coming;
     }
 
     [Serializable]
@@ -24,21 +26,52 @@ namespace Tanner.Persistence
         public string Name { get; set; }
         public string PhoneNumber { get; set; }
         public string Id { get; set; }
+        public string ChannelAccountId { get; set; }
+        public SingleRSVP MainRSVP { get; set; }
     }
 
     public class UserContextFactory
     {
-        public static UserContext FromChannelAccount(ChannelAccount accountData)
+        public static async Task<UserContext> EnsureFromChannelAccount(ChannelAccount accountData)
+        {
+            // Try to find by ChannelAccountId, it should be reliable
+            var lookup = await FromChannelAccountId(accountData.Id);
+            if (lookup != null)
+                return lookup;
+
+            // Phone number is a good one and most likely to have a match if we've setup the user context's ahead of time
+            if (accountData.ChannelId == "sms")
+            {
+                lookup = await FromPhoneNumber(accountData.Address);
+
+                if (lookup != null)
+                    return lookup;
+            }
+
+            // Locally test known users
+            if (accountData.ChannelId == "emulator" && accountData.Name == "Jeff")
+            {
+                lookup = await FromPhoneNumber("+13303303300");
+                if (lookup != null)
+                    return lookup;
+            }
+
+            // Not found, need to create it
+            return CreateFromChannelAccount(accountData);
+        }
+        public static UserContext CreateFromChannelAccount(ChannelAccount accountData)
         {
             if (accountData == null)
                 return null;
 
             var context = new UserContext();
-
+            context.ChannelAccountId = accountData.Id;
+  
+            // TODO: Makes the dev a bit easier but maybe remove in prod
             if (accountData.ChannelId == "emulator")
             {
                 context.Name = accountData.Name;
-                context.PhoneNumber = "(555) 867 - 5309";
+                context.PhoneNumber = "+15558675309";
                 return context;
             }
             else if (accountData.ChannelId == "sms")
@@ -57,19 +90,52 @@ namespace Tanner.Persistence
             return null;
         }
 
-        public static async System.Threading.Tasks.Task<UserContext> FromPhoneNumber(string phoneNumber)
+        public static async Task<UserContext> FromPhoneNumber(string phoneNumber)
         {
-            var items = await DocumentDBRepository<UserContext>.GetItemsAsync(uc => uc.PhoneNumber == phoneNumber);
+            // TODO: GetItemsAsync doesn't work with a real predicate
+            var all_items = await DocumentDBRepository<UserContext>.GetItemsAsync(obj => true);
+            var search_item = all_items.FirstOrDefault(obj => obj.PhoneNumber.Equals(phoneNumber));
 
-            if (items.Count() == 0)
-                return null;
+            if (search_item != null)
+                return search_item;
 
-            if (items.Count() != 1)
-                throw new System.InvalidOperationException("Found multiple user contexts with the same phone number");
-            
-            return items.First();
+            return null;
+        }
+
+        public static async Task<UserContext> FromChannelAccountId(string channelId)
+        {
+            // TODO: GetItemsAsync doesn't work with a real predicate
+            var all_items = await DocumentDBRepository<UserContext>.GetItemsAsync(obj => true);
+            var search_item = all_items.FirstOrDefault(obj => obj.ChannelAccountId != null && obj.ChannelAccountId.Equals(channelId));
+
+            if (search_item != null)
+                return search_item;
+
+            return null;
+        }
+
+        // HACK: No idea where this sort of code should live
+        public static async Task<Microsoft.Azure.Documents.Document> EnsurePresisted(UserContext obj)
+        {
+            if (obj == null)
+                new System.InvalidOperationException("Blank user context provided");
+
+            UserContext persisted_obj = null;
+            if (obj.Id != null)
+                persisted_obj = await DocumentDBRepository<UserContext>.GetItemAsync(obj.Id);
+
+            if (persisted_obj == null)
+            {
+                // Need to create this
+                return await DocumentDBRepository<UserContext>.CreateItemAsync(obj);
+            }
+            else
+            {
+                return await DocumentDBRepository<UserContext>.UpdateItemAsync(obj.Id, obj);
+            }
         }
     }
+
 
     [Serializable]
     public class RSVP_Models

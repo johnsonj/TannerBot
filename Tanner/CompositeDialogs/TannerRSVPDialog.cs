@@ -75,13 +75,32 @@ namespace Tanner.CompositeDialogs
             }
             else
             {
-                await context.PostAsync("You will be missed but thank you for letting us know.");
+                user_context.Name = person.Name;
+                user_context.PhoneNumber = person.CellPhone;
+                
+                user_context.MainRSVP = new SingleRSVP();
+                user_context.MainRSVP.is_coming = false;
+
+                await UserContextFactory.EnsurePresisted(user_context);
+
+                await context.PostAsync("You will be missed, thank you for letting us know.");
                 context.Done<object>(null);
             }
         }
         public async Task OnDinnerOption(IDialogContext context, IAwaitable<DinnerOption> dinnerOption)
         {
             dinner_option = await dinnerOption;
+
+            user_context.Name = person.Name;
+            user_context.PhoneNumber = person.CellPhone;
+
+            user_context.MainRSVP = new SingleRSVP();
+            user_context.MainRSVP.is_coming = true;
+            user_context.MainRSVP.dinner_option = dinner_option;
+            user_context.MainRSVP.person = person;
+ 
+            await UserContextFactory.EnsurePresisted(user_context);
+
             await context.PostAsync(String.Format("Thanks {0} we'll have that {1} ready for you.", person.Name, dinner_option.PlateOption.ToString()));
             context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu(), options: FormOptions.PromptInStart), OnMainMenu);
         }

@@ -26,7 +26,7 @@ namespace Tanner.Forms
         [Prompt("What is your cellphone number? {?(Say ok if it's {CellPhone})}")]
         public string CellPhone;
  
-        [Prompt("Alright {Name}, will you be attending our wedding on June 4th at Golden Gardens in Seattle?")]
+        [Prompt("Alright {Name}, will you be attending the Johnson-Klimczak wedding on June 4th at Golden Gardens in Seattle?")]
         public bool Attendance;
         
         public static IForm<Person> BuildForm()
@@ -37,7 +37,7 @@ namespace Tanner.Forms
 
     public enum PlateOptions
     {
-        TomattoWellington /* vegitarian */,
+        TomatoWellington /* vegitarian */,
         FlankSteak,
         Salmon,
         TacosFromDrewsDirtyTacoTruck,
