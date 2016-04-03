@@ -1,4 +1,22 @@
-﻿ body {
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+ body {
         background:#F6F7FA;
         margin: 20px;
         font-family: "Segoe UI", sans-serif;
@@ -54,7 +72,6 @@
       font-size: 34px;
       margin:-4px 0 0 0;padding:0;
       font-weight:400;
-
     }
  
     p {font-size:15px; line-height: 1.5em;margin:0 0 1em 0;}
