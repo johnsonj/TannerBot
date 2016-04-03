@@ -20,15 +20,13 @@ namespace Tanner.Forms
             "Sorry, I'm just a bot, I don't understand \"{0}\", blame Jeff and try again")]
     public class Person
     {
-        [Prompt("What is your full name?")]
+        [Prompt("What's your full name? {?(Say ok if it's {Name})}")]
         public string Name;
 
-        [Prompt("What is your cellphone number?")]
+        [Prompt("What is your cellphone number? {?(Say ok if it's {CellPhone})}")]
         public string CellPhone;
-
-        // TODO: Address
  
-        [Prompt("Will you be attending {Name}? {||}")]
+        [Prompt("Alright {Name}, will you be attending our wedding on June 4th at Golden Gardens in Seattle?")]
         public bool Attendance;
         
         public static IForm<Person> BuildForm()
@@ -52,21 +50,9 @@ namespace Tanner.Forms
         [Prompt("What would you like to eat? {||}")]
         public PlateOptions? PlateOption;
 
-        private Person person;
-
         public static IForm<DinnerOption> BuildForm()
         {
             return new FormBuilder<DinnerOption>().Build();
-        }
-
-        public DinnerOption(Person person)
-        {
-            this.person = person;
-        }
-
-        public Person GetPerson()
-        {
-            return person;
         }
     }
 }
