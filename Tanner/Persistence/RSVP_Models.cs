@@ -28,6 +28,15 @@ namespace Tanner.Persistence
         public string Id { get; set; }
         public string ChannelAccountId { get; set; }
         public SingleRSVP MainRSVP { get; set; }
+
+        // HACK: Ideally we'd do something smart with this, like a list of RSVPs but the wedding is fast approaching. 
+        // Not all guests get a +1
+        public bool GuestAllotted { get { return guest_allotted; } set { guest_allotted = value; } }
+        public SingleRSVP GuestRSVP { get; set; }
+
+
+        // Not sure how else to do a default value
+        private bool guest_allotted = false;
     }
 
     public class UserContextFactory

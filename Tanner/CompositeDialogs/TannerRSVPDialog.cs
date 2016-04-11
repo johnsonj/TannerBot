@@ -22,6 +22,7 @@ namespace Tanner.CompositeDialogs
         private UserContext user_context;
         private Person person;
         private DinnerOption dinner_option;
+        private bool in_guest_rsvp = false;
 
         public TannerRSVPDialog(UserContext context)
         {
@@ -45,7 +46,11 @@ namespace Tanner.CompositeDialogs
         {
             if ((await mainMenu).rsvp.Value)
             {
-                await StartRSVP(context);
+                var hydratedPerson = new Person();
+                if (user_context.MainRSVP != null && user_context.MainRSVP.person != null)
+                    hydratedPerson = user_context.MainRSVP.person;
+
+                await StartRSVP(context, hydratedPerson);
             }
             else
             {
@@ -55,14 +60,9 @@ namespace Tanner.CompositeDialogs
         }
 
 
-        public async Task StartRSVP(IDialogContext context)
+        public async Task StartRSVP(IDialogContext context, Person hydratedPerson)
         {
-            var hydratedPerson = new Person();
-            if (user_context != null)
-            {
-                hydratedPerson.Name = user_context.Name;
-                hydratedPerson.CellPhone = user_context.PhoneNumber;
-            }
+            // TODO: Tell the user here if they do or do not have an RSVP
             context.Call<Person>(new FormDialog<Person>(hydratedPerson, options: FormOptions.PromptInStart), OnPerson);
         }
 
@@ -75,16 +75,27 @@ namespace Tanner.CompositeDialogs
             }
             else
             {
-                user_context.Name = person.Name;
-                user_context.PhoneNumber = person.CellPhone;
-                
-                user_context.MainRSVP = new SingleRSVP();
-                user_context.MainRSVP.is_coming = false;
+                if(in_guest_rsvp)
+                {
+                    if (user_context.GuestRSVP == null)
+                        user_context.GuestRSVP = new SingleRSVP();
 
-                await UserContextFactory.EnsurePresisted(user_context);
+                    user_context.GuestRSVP.is_coming = false;
+                    await context.PostAsync("Thanks for confirming!");
+                    await UserContextFactory.EnsurePresisted(user_context);
+                    await OnAllDone(context);
+                }
+                else
+                {
+                    // REVIEW: Do we need to hydrate MainRSVP.person?
+                    if (user_context.MainRSVP == null)
+                        user_context.MainRSVP = new SingleRSVP();
 
-                await context.PostAsync("You will be missed, thank you for letting us know.");
-                context.Done<object>(null);
+                    user_context.MainRSVP.is_coming = false;
+                    await UserContextFactory.EnsurePresisted(user_context);
+                    await context.PostAsync("You will be missed, thank you for letting us know.");
+                    context.Done<object>(null);
+                }
             }
         }
         public async Task OnDinnerOption(IDialogContext context, IAwaitable<DinnerOption> dinnerOption)
@@ -94,14 +105,39 @@ namespace Tanner.CompositeDialogs
             user_context.Name = person.Name;
             user_context.PhoneNumber = person.CellPhone;
 
-            user_context.MainRSVP = new SingleRSVP();
-            user_context.MainRSVP.is_coming = true;
-            user_context.MainRSVP.dinner_option = dinner_option;
-            user_context.MainRSVP.person = person;
- 
+            var current_rsvp = new SingleRSVP();
+            current_rsvp.is_coming = true;
+            current_rsvp.dinner_option = dinner_option;
+            current_rsvp.person = person;
+
+            if(!in_guest_rsvp)
+                user_context.MainRSVP = current_rsvp;
+            else
+                user_context.GuestRSVP = current_rsvp;
+            
             await UserContextFactory.EnsurePresisted(user_context);
 
-            await context.PostAsync(String.Format("Thanks {0} we'll have that {1} ready for you.", person.Name, dinner_option.PlateOption.ToString()));
+            // Decide what to do next
+            if (!in_guest_rsvp && user_context.GuestAllotted)
+            {
+                in_guest_rsvp = true;
+                var hydratedPerson = new Person();
+                if (user_context.GuestRSVP != null)
+                {
+                    hydratedPerson = user_context.GuestRSVP.person;
+                }
+                await StartRSVP(context, hydratedPerson);
+            }
+            else
+            {
+                await OnAllDone(context);
+            }
+
+        }
+        public async Task OnAllDone(IDialogContext context)
+        {
+            // TODO: Nice confirmation here
+            await context.PostAsync(String.Format("Thanks {0} we'll have that {1} ready for you.", person.Name));
             context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu(), options: FormOptions.PromptInStart), OnMainMenu);
         }
     }
