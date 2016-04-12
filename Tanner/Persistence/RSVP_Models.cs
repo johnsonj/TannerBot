@@ -44,19 +44,16 @@ namespace Tanner.Persistence
             if (lookup != null)
                 return lookup;
 
-            // Phone number is a good one and most likely to have a match if we've setup the user context's ahead of time
-            if (accountData.ChannelId == "sms")
-            {
-                lookup = await FromPhoneNumber(accountData.Address);
+            // Try address, hope its a phone number!
+            lookup = await FromPhoneNumber(accountData.Address, accountData.Id);
 
-                if (lookup != null)
-                    return lookup;
-            }
+            if (lookup != null)
+                return lookup;
 
             // Locally test known users
             if (accountData.ChannelId == "emulator" && accountData.Name == "Jeff")
             {
-                lookup = await FromPhoneNumber("+15555555555");
+                lookup = await FromPhoneNumber("+15555555555", null /*channelId*/);
                 if (lookup != null)
                     return lookup;
             }
@@ -95,14 +92,22 @@ namespace Tanner.Persistence
             return null;
         }
 
-        public static async Task<UserContext> FromPhoneNumber(string phoneNumber)
+        public static async Task<UserContext> FromPhoneNumber(string phoneNumber, string channelId)
         {
             // TODO: GetItemsAsync doesn't work with a real predicate
             var all_items = await DocumentDBRepository<UserContext>.GetItemsAsync(obj => true);
             var search_item = all_items.FirstOrDefault(obj => obj.PhoneNumber.Equals(phoneNumber));
 
             if (search_item != null)
+            {
+                // Update the found item with the current channelId for lookup later
+                if (channelId != null)
+                {
+                    search_item.ChannelAccountId = channelId;
+                    await EnsurePresisted(search_item);
+                }
                 return search_item;
+            }
 
             return null;
         }
