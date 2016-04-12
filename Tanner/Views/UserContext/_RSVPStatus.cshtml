@@ -1,0 +1,23 @@
+﻿@model Tanner.Persistence.SingleRSVP
+
+@{
+    Layout = null;
+}
+
+@if (Model == null)
+{
+    <dd>Not yet responded.</dd>
+}
+else
+{
+    if (Model.Person.Attendance.Value)
+    {
+        <dd>Responded and planning to attend.</dd>
+                <dt>Dinner Option</dt>
+                <dd>@Model.DinnerOption.PlateOption.ToString()</dd>
+    }
+    else
+    {
+        <dd>Responded and not attending.</dd>
+    }
+}

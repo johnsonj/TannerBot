@@ -18,20 +18,18 @@ namespace Tanner.Forms
             "Try again, I don't get \"{0}\".",
             "{0}? That doesn't make sense to me, try again",
             "Sorry, I'm just a bot, I don't understand \"{0}\", blame Jeff and try again")]
-    public class Person
+    public class SinglePersonRSVP
     {
-        [Prompt("What's your full name? {?(Say ok if it's {Name})}")]
-        public string Name;
+        public string FullName;
 
-        [Prompt("What is your cellphone number? {?(Say ok if it's {CellPhone})}")]
-        public string CellPhone;
+        public string CellPhoneNumber;
  
-        [Prompt("Alright {Name}, will you be attending the Johnson-Klimczak wedding on June 4th at Golden Gardens in Seattle?")]
-        public bool Attendance;
+        [Prompt("Will {FullName} be attending the Johnson-Klimczak wedding on June 4th at Golden Gardens in Seattle?")]
+        public bool? Attendance;
         
-        public static IForm<Person> BuildForm()
+        public static IForm<SinglePersonRSVP> BuildForm()
         {
-            return new FormBuilder<Person>().Build();
+            return new FormBuilder<SinglePersonRSVP>().Build();
         }
     }
 
