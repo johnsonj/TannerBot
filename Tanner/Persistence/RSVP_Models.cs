@@ -17,7 +17,6 @@ namespace Tanner.Persistence
     {
         public Forms.SinglePersonRSVP Person;
         public Forms.DinnerOption DinnerOption;
-        public bool is_coming;
     }
 
     [Serializable]
