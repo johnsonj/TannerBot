@@ -17,92 +17,221 @@ using Tanner.Persistence;
 namespace Tanner.CompositeDialogs
 {
     [Serializable]
-    class TannerRSVPDialog : IDialog
+    public class RSVPMainMenu
     {
-        private UserContext user_context;
-        private Person person;
-        private DinnerOption dinner_option;
+        [Prompt("Are you ready to RSVP today?")]
+        public bool? rsvp;
+    }
+
+    [Serializable]
+    public class SingleGuestRSVP
+    {
+        [Prompt("Will you be bringing a guest?")]
+        public bool? guest;
+    }
+
+    [Serializable]
+    class TannerRSVPDialog : IDialog<object>
+    {
+        private UserContext m_userContext;
+        private SinglePersonRSVP m_currentPerson;
+        private bool m_fInGuestRsvp = false;
 
         public TannerRSVPDialog(UserContext context)
         {
-            this.user_context = context;
+            this.m_userContext = context;
         }
 
-
-        [Serializable]
-        public class RSVPMainMenu
+        async Task IDialog<object>.StartAsync(IDialogContext context)
         {
-            [Prompt("Are you ready to RSVP today?")]
-            public bool? rsvp;
-        }
-
-        async Task IDialog.StartAsync(IDialogContext context)
-        {
-            context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu()), OnMainMenu);
+            if(this.m_userContext.MainRSVP != null)
+            {
+                await context.PostAsync("I already have your RSVP information. Do you need to change it?");
+                context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu(), options: FormOptions.None), OnMainMenu);
+            }
+            else
+            {
+                context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu()), OnMainMenu);
+            }
         }
 
         public async Task OnMainMenu(IDialogContext context, IAwaitable<RSVPMainMenu> mainMenu)
         {
             if ((await mainMenu).rsvp.Value)
             {
-                await StartRSVP(context);
+                var hydratedPerson = new SinglePersonRSVP();
+                if (m_userContext.Name != null)
+                {
+                    hydratedPerson.FullName = m_userContext.Name;
+                    hydratedPerson.CellPhoneNumber = m_userContext.PhoneNumber;
+                }
+
+                StartRSVP(context, hydratedPerson);
             }
             else
             {
-                await context.PostAsync("Ok! Let me know when you're ready. Please respond before May 15th.");
-                context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu()), OnMainMenu);
+                if (this.m_userContext.MainRSVP == null)
+                {
+                    // No RSVP exists yet
+                    await context.PostAsync("Ok! Let me know when you're ready. Please respond before May 15th.");
+                    context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu()), OnMainMenu);
+                }
+                else
+                {
+                    await OnAllDone(context);
+                }
+
             }
         }
 
 
-        public async Task StartRSVP(IDialogContext context)
+        public void StartRSVP(IDialogContext context, SinglePersonRSVP hydratedPerson)
         {
-            var hydratedPerson = new Person();
-            if (user_context != null)
+            // TODO: Tell the user here if they do or do not have an RSVP
+            context.Call(new FormDialog<SinglePersonRSVP>(hydratedPerson, options: FormOptions.PromptInStart), OnPerson);
+        }
+
+        public void StartGuestRSVP(IDialogContext context)
+        {
+            m_fInGuestRsvp = true;
+            context.Call(new FormDialog<SingleGuestRSVP>(new SingleGuestRSVP(), options: FormOptions.PromptInStart), OnSingleGuestRSVP);
+        }
+
+        public async Task OnSingleGuestRSVP(IDialogContext context, IAwaitable<SingleGuestRSVP> singleGuestRSVPTask)
+        {
+            var guestRSVP = await singleGuestRSVPTask;
+            if (m_userContext.GuestRSVP == null)
             {
-                hydratedPerson.Name = user_context.Name;
-                hydratedPerson.CellPhone = user_context.PhoneNumber;
+                m_userContext.GuestRSVP = new SingleRSVP();
+                m_userContext.GuestRSVP.Person = new SinglePersonRSVP();
+                m_userContext.GuestRSVP.Person.CellPhoneNumber = "(optional)";
             }
-            context.Call<Person>(new FormDialog<Person>(hydratedPerson, options: FormOptions.PromptInStart), OnPerson);
+
+            m_currentPerson = m_userContext.GuestRSVP.Person;
+
+            if (guestRSVP.guest.Value)
+            {
+                m_userContext.GuestRSVP.Person.Attendance = true;
+                StartRSVP(context, m_userContext.GuestRSVP.Person);
+            }
+            else
+            {
+                m_userContext.GuestRSVP.Person.Attendance = false;
+                await context.PostAsync("Sorry they can't make it, but thanks for confirming.");
+                await UserContextFactory.EnsurePresisted(m_userContext);
+                await OnAllDone(context);
+            }
         }
 
-        public async Task OnPerson(IDialogContext context, IAwaitable<Person> personTask)
+        public async Task OnPerson(IDialogContext context, IAwaitable<SinglePersonRSVP> personTask)
         {
-            person = await personTask;
-            if (person.Attendance)
+            m_currentPerson = await personTask;
+            if (m_currentPerson.Attendance.Value)
             {
                 context.Call<DinnerOption>(new FormDialog<DinnerOption>(new DinnerOption(), options: FormOptions.PromptInStart), OnDinnerOption);
             }
             else
             {
-                user_context.Name = person.Name;
-                user_context.PhoneNumber = person.CellPhone;
-                
-                user_context.MainRSVP = new SingleRSVP();
-                user_context.MainRSVP.is_coming = false;
+                if(m_fInGuestRsvp)
+                {
+                    // REVIEW: should this be reached?
+                    throw new System.InvalidOperationException();
+                }
+                else
+                {
+                    // REVIEW: Do we need to hydrate MainRSVP.person?
+                    if (m_userContext.MainRSVP == null)
+                        m_userContext.MainRSVP = new SingleRSVP();
 
-                await UserContextFactory.EnsurePresisted(user_context);
-
-                await context.PostAsync("You will be missed, thank you for letting us know.");
-                context.Done<object>(null);
+                    m_userContext.MainRSVP.Person.Attendance = false;
+                    await UserContextFactory.EnsurePresisted(m_userContext);
+                    await context.PostAsync("You will be missed, thank you for letting us know.");
+                    context.Done<object>(null);
+                }
             }
         }
-        public async Task OnDinnerOption(IDialogContext context, IAwaitable<DinnerOption> dinnerOption)
+        public async Task OnDinnerOption(IDialogContext context, IAwaitable<DinnerOption> dinnerOptionTask)
         {
-            dinner_option = await dinnerOption;
+            var dinnerOption = await dinnerOptionTask;
 
-            user_context.Name = person.Name;
-            user_context.PhoneNumber = person.CellPhone;
+            if(!m_fInGuestRsvp)
+            {
+                // Ensure the main context object is up to date.
+                // This is redundant and probably should be removed
+                m_userContext.Name = m_currentPerson.FullName;
+                m_userContext.PhoneNumber = m_currentPerson.CellPhoneNumber;
+            }
 
-            user_context.MainRSVP = new SingleRSVP();
-            user_context.MainRSVP.is_coming = true;
-            user_context.MainRSVP.dinner_option = dinner_option;
-            user_context.MainRSVP.person = person;
- 
-            await UserContextFactory.EnsurePresisted(user_context);
+            var current_rsvp = new SingleRSVP();
+            current_rsvp.DinnerOption = dinnerOption;
+            current_rsvp.Person = m_currentPerson;
+            // REVIEW: needed?
+            current_rsvp.Person.Attendance = true;
 
-            await context.PostAsync(String.Format("Thanks {0} we'll have that {1} ready for you.", person.Name, dinner_option.PlateOption.ToString()));
-            context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu(), options: FormOptions.PromptInStart), OnMainMenu);
+            if(!m_fInGuestRsvp)
+                m_userContext.MainRSVP = current_rsvp;
+            else
+                m_userContext.GuestRSVP = current_rsvp;
+            
+            await UserContextFactory.EnsurePresisted(m_userContext);
+
+            // Decide what to do next
+            if (!m_fInGuestRsvp && m_userContext.GuestAllotted)
+            {
+                StartGuestRSVP(context);
+            }
+            else
+            {
+                m_fInGuestRsvp = false;
+                await OnAllDone(context);
+            }
+
+        }
+        public async Task OnAllDone(IDialogContext context)
+        {
+            await context.PostAsync(String.Format("Thanks! Just to confirm: {0}", DescribeFullRSVP(m_userContext)));
+            context.Done<object>(null);
+        }
+
+        public string DescribeFullRSVP(UserContext context)
+        {
+            string res = DescribeSingleRSVP(context.MainRSVP, true);
+
+            if(context.MainRSVP != null && context.GuestRSVP != null)
+            {
+                res += " with guest " + DescribeSingleRSVP(context.GuestRSVP, false);
+            }
+
+            return res;
+        }
+
+        public string DescribeSingleRSVP(SingleRSVP rsvp, bool show_attendance)
+        {
+            string res = "";
+
+            if(rsvp == null)
+            {
+                res = "Not yet responded to invitation";
+            }
+            else
+            {
+                res += rsvp.Person.FullName;
+                if(rsvp.Person.Attendance.Value)
+                {
+                    if (show_attendance)
+                        res += " is attending and eating ";
+                    else
+                        res += " who is eating ";
+
+                    res += rsvp.DinnerOption.PlateOption.ToString();
+                }
+                else
+                {
+                    res += " is not attending";
+                }
+            }
+
+            return res;
         }
     }
 }

@@ -15,8 +15,8 @@ namespace Tanner.Persistence
     [Serializable]
     public class SingleRSVP
     {
-        public Forms.Person person;
-        public Forms.DinnerOption dinner_option;
+        public Forms.SinglePersonRSVP Person;
+        public Forms.DinnerOption DinnerOption;
         public bool is_coming;
     }
 
@@ -28,6 +28,11 @@ namespace Tanner.Persistence
         public string Id { get; set; }
         public string ChannelAccountId { get; set; }
         public SingleRSVP MainRSVP { get; set; }
+
+        // HACK: Ideally we'd do something smart with this, like a list of RSVPs but the wedding is fast approaching. 
+        // Not all guests get a +1
+        public bool GuestAllotted { get; set; }
+        public SingleRSVP GuestRSVP { get; set; }
     }
 
     public class UserContextFactory
@@ -51,7 +56,7 @@ namespace Tanner.Persistence
             // Locally test known users
             if (accountData.ChannelId == "emulator" && accountData.Name == "Jeff")
             {
-                lookup = await FromPhoneNumber("+13303303300");
+                lookup = await FromPhoneNumber("+15555555555");
                 if (lookup != null)
                     return lookup;
             }

@@ -14,6 +14,7 @@
     <tr>
         <th>Name</th>
         <th>Phone Number</th>
+        <th>Guest Allotted?</th>
         <th>Has Responded - Is Coming</th>
         <th></th>
     </tr>
@@ -22,13 +23,25 @@
     <tr>
         <td>@item.Name</td>
         <td>@item.PhoneNumber</td>
+        <td>@item.GuestAllotted</td>
         <td>
             @if (item.MainRSVP != null)
             {
                 <span>Yes</span>
-                if (item.MainRSVP.is_coming)
+                if (item.MainRSVP.Person.Attendance.Value)
                 {
-                    <span> - Cominng</span>
+                    if (item.GuestRSVP == null)
+                    {
+                        <span> - Cominng</span>
+                    }
+                    else if (item.GuestRSVP.Person.Attendance.Value)
+                    {
+                        <span> - Coming with Guest</span>
+                    }
+                    else
+                    {
+                        <span> - Comming No Guest</span>
+                    }
                 }
                 else
                 {

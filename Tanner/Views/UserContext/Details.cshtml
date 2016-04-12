@@ -30,23 +30,36 @@
         <dt>
             RSVP Status
         </dt>
-        @if (Model.MainRSVP == null)
+
+        @if (Model.MainRSVP != null)
         {
-            <dd>Not yet responded.</dd>
+            <dt>
+                @Html.Partial("~/Views/UserContext/_RSVPStatus.cshtml", Model.MainRSVP)
+            </dt>
         }
         else
         {
-            if(Model.MainRSVP.is_coming)
-            {
-                <dd>Responded and planning to attend.</dd>
-                <dt>Dinner Option</dt>
-                <dd>@Model.MainRSVP.dinner_option.PlateOption.ToString()</dd>
-            }
-            else
-            {
-                <dd>Responded and not attending.</dd>
-            }
+            <dt>
+                Not Responded
+            </dt>
         }
+
+        <dt>
+            @Html.DisplayNameFor(model => model.GuestAllotted)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.GuestAllotted)
+        </dd>
+
+        @if(Model.GuestAllotted && Model.GuestRSVP != null)
+        {
+            <dt>Guest RSVP Status</dt>
+            <dt>
+                @Html.Partial("~/Views/UserContext/_RSVPStatus.cshtml", Model.GuestRSVP)
+            </dt>
+        }
+
     </dl>
 </div>
 <p>

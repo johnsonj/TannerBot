@@ -36,7 +36,7 @@ namespace Tanner.Controllers
         [HttpPost]
         [ActionName("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> CreateAsync([Bind(Include = "Id,Name,PhoneNumber")] UserContext model)
+        public async Task<ActionResult> CreateAsync([Bind(Include = "Id,Name,PhoneNumber,GuestAllotted")] UserContext model)
         {
             if (ModelState.IsValid)
             {
@@ -50,7 +50,7 @@ namespace Tanner.Controllers
         [HttpPost]
         [ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditAsync([Bind(Include = "Id,Name,PhoneNumber")] UserContext user_context)
+        public async Task<ActionResult> EditAsync([Bind(Include = "Id,Name,PhoneNumber,GuestAllotted")] UserContext user_context)
         {
             if (ModelState.IsValid)
             {

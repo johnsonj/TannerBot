@@ -13,7 +13,7 @@
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
-        <h4>UserContext</h4>
+        <h4>New Known User</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         <div class="form-group">
@@ -30,6 +30,14 @@
                 <div class="col-md-10">
                     @Html.EditorFor(model => model.PhoneNumber)
                     @Html.ValidationMessageFor(model => model.PhoneNumber)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.GuestAllotted, new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.GuestAllotted)
+                    @Html.ValidationMessageFor(model => model.GuestAllotted)
                 </div>
             </div>
 
