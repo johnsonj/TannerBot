@@ -128,7 +128,9 @@ namespace Tanner.CompositeDialogs
             m_currentPerson = await personTask;
             if (m_currentPerson.Attendance.Value)
             {
-                context.Call<DinnerOption>(new FormDialog<DinnerOption>(new DinnerOption(), options: FormOptions.PromptInStart), OnDinnerOption);
+                var dinnerOption = new DinnerOption();
+                dinnerOption.GuestName = m_fInGuestRsvp ? m_currentPerson.FullName : "you";
+                context.Call<DinnerOption>(new FormDialog<DinnerOption>(dinnerOption, options: FormOptions.PromptInStart), OnDinnerOption);
             }
             else
             {

@@ -45,8 +45,10 @@ namespace Tanner.Forms
     [Serializable]
     public class DinnerOption
     {
-        [Prompt("What would you like to eat? {||}")]
+        [Prompt("What would {GuestName} like to eat? {||}")]
         public PlateOptions? PlateOption;
+
+        public string GuestName;
 
         public static IForm<DinnerOption> BuildForm()
         {

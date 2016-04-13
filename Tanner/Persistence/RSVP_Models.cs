@@ -50,7 +50,7 @@ namespace Tanner.Persistence
                 return lookup;
 
             // Locally test known users
-            if (accountData.ChannelId == "emulator" && accountData.Name == "Jeff")
+            if (accountData.ChannelId == "emulator" && accountData.Name == "User1")
             {
                 lookup = await FromPhoneNumber("+15555555555", null /*channelId*/);
                 if (lookup != null)
