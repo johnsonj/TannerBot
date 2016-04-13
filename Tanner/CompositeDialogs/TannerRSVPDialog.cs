@@ -44,9 +44,9 @@ namespace Tanner.CompositeDialogs
 
         async Task IDialog<object>.StartAsync(IDialogContext context)
         {
-            if(this.m_userContext.MainRSVP != null)
+            if(m_userContext.MainRSVP != null)
             {
-                await context.PostAsync("I already have your RSVP information. Do you need to change it?");
+                await context.PostAsync("I have your RSVP as: " + DescribeFullRSVP(m_userContext) + ". Let me know if you need to change it.");
                 context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu(), options: FormOptions.None), OnMainMenu);
             }
             else
@@ -60,6 +60,7 @@ namespace Tanner.CompositeDialogs
             if ((await mainMenu).rsvp.Value)
             {
                 var hydratedPerson = new SinglePersonRSVP();
+                hydratedPerson.FullNamePrompt = "your";
                 if (m_userContext.Name != null)
                 {
                     hydratedPerson.FullName = m_userContext.Name;
@@ -87,7 +88,6 @@ namespace Tanner.CompositeDialogs
 
         public void StartRSVP(IDialogContext context, SinglePersonRSVP hydratedPerson)
         {
-            // TODO: Tell the user here if they do or do not have an RSVP
             context.Call(new FormDialog<SinglePersonRSVP>(hydratedPerson, options: FormOptions.PromptInStart), OnPerson);
         }
 
@@ -108,11 +108,12 @@ namespace Tanner.CompositeDialogs
             }
 
             m_currentPerson = m_userContext.GuestRSVP.Person;
+            m_currentPerson.FullNamePrompt = "your guest's";
 
             if (guestRSVP.guest.Value)
             {
                 m_userContext.GuestRSVP.Person.Attendance = true;
-                StartRSVP(context, m_userContext.GuestRSVP.Person);
+                StartRSVP(context, m_currentPerson);
             }
             else
             {
@@ -191,7 +192,7 @@ namespace Tanner.CompositeDialogs
         }
         public async Task OnAllDone(IDialogContext context)
         {
-            await context.PostAsync(String.Format("Thanks! Just to confirm: {0}", DescribeFullRSVP(m_userContext)));
+            await context.PostAsync(String.Format("Thanks for your RSVP!"));
             context.Done<object>(null);
         }
 

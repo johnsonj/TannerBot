@@ -20,7 +20,10 @@ namespace Tanner.Forms
             "Sorry, I'm just a bot, I don't understand \"{0}\", blame Jeff and try again")]
     public class SinglePersonRSVP
     {
+        [Prompt("What is {FullNamePrompt} full name?")]
         public string FullName;
+
+        public string FullNamePrompt;
 
         public string CellPhoneNumber;
  
@@ -29,7 +32,11 @@ namespace Tanner.Forms
         
         public static IForm<SinglePersonRSVP> BuildForm()
         {
-            return new FormBuilder<SinglePersonRSVP>().Build();
+            return new FormBuilder<SinglePersonRSVP>()
+                .Field(nameof(SinglePersonRSVP.FullName))
+                .Field(nameof(SinglePersonRSVP.CellPhoneNumber))
+                .Field(nameof(SinglePersonRSVP.Attendance))
+                .Build();
         }
     }
 
