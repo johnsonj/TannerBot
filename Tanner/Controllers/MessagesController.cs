@@ -30,7 +30,7 @@ namespace Tanner
             if (message.Type == "Message")
             {
                 var context = await Persistence.UserContextFactory.EnsureFromChannelAccount(message.Participants[0]);
-                return await Conversation.SendAsync(message, () => new CompositeDialogs.TannerRSVPDialog(context));
+                return await Conversation.SendAsync(message, () => new CompositeDialogs.TannerRSVPDialog2(context));
             }
             else
             {

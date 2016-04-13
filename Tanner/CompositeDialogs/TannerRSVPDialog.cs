@@ -16,11 +16,33 @@ using Tanner.Persistence;
 
 namespace Tanner.CompositeDialogs
 {
+    //public enum RSVPMenuOption
+    //{
+    //   [Terms("yes", "sure", "ok", "rsvp", "go")]
+    //    Yes,
+    //   [Terms("no", "not today", "no thanks", "nope")]
+    //    No,
+    //}
+
     [Serializable]
     public class RSVPMainMenu
     {
-        [Prompt("Are you ready to RSVP today?")]
+        [Prompt("{RSVPPrompt}")]
         public bool? rsvp;
+
+        public string RSVPPrompt
+        {
+            get
+            {
+                if (m_rsvp_menu != null)
+                    return m_rsvp_menu;
+                else
+                    return "Are you ready to RSVP today?";
+            }
+            set { m_rsvp_menu = value; }
+        }
+
+        private string m_rsvp_menu;
     }
 
     [Serializable]
@@ -31,27 +53,31 @@ namespace Tanner.CompositeDialogs
     }
 
     [Serializable]
-    class TannerRSVPDialog : IDialog<object>
+    class TannerRSVPDialog2 : IDialog<object>
     {
         private UserContext m_userContext;
         private SinglePersonRSVP m_currentPerson;
         private bool m_fInGuestRsvp = false;
 
-        public TannerRSVPDialog(UserContext context)
+        public TannerRSVPDialog2(UserContext context)
         {
             this.m_userContext = context;
         }
 
         async Task IDialog<object>.StartAsync(IDialogContext context)
         {
-            if(m_userContext.MainRSVP != null)
+            var menu = new RSVPMainMenu();
+
+            if (m_userContext.MainRSVP != null)
             {
-                await context.PostAsync("I have your RSVP as: " + DescribeFullRSVP(m_userContext) + ". Let me know if you need to change it.");
-                context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu(), options: FormOptions.None), OnMainMenu);
+                await context.PostAsync("I have your RSVP as: " + DescribeFullRSVP(m_userContext) + ". Thank you!");
+                menu.RSVPPrompt = "Do you need to change your RSVP? I have it as " + DescribeFullRSVP(m_userContext);
+                context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(menu, options: FormOptions.None), OnMainMenu);
             }
             else
             {
-                context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(new RSVPMainMenu()), OnMainMenu);
+                menu.RSVPPrompt = "Are you ready to RSVP today?";
+                context.Call<RSVPMainMenu>(new FormDialog<RSVPMainMenu>(menu), OnMainMenu);
             }
         }
 
@@ -59,6 +85,11 @@ namespace Tanner.CompositeDialogs
         {
             if ((await mainMenu).rsvp.Value)
             {
+                // Reset all of the guest state
+                m_fInGuestRsvp = false;
+                m_userContext.MainRSVP = null;
+                m_userContext.GuestRSVP = null;
+
                 var hydratedPerson = new SinglePersonRSVP();
                 hydratedPerson.FullNamePrompt = "your";
                 if (m_userContext.Name != null)
@@ -142,9 +173,12 @@ namespace Tanner.CompositeDialogs
                 }
                 else
                 {
-                    // REVIEW: Do we need to hydrate MainRSVP.person?
                     if (m_userContext.MainRSVP == null)
+                    {
                         m_userContext.MainRSVP = new SingleRSVP();
+                        m_userContext.MainRSVP.Person = new SinglePersonRSVP();
+                        m_userContext.MainRSVP.Person.FullName = m_userContext.Name;
+                    }
 
                     m_userContext.MainRSVP.Person.Attendance = false;
                     await UserContextFactory.EnsurePresisted(m_userContext);
@@ -198,11 +232,21 @@ namespace Tanner.CompositeDialogs
 
         public string DescribeFullRSVP(UserContext context)
         {
+            if (context == null)
+                throw new System.InvalidOperationException();
+
             string res = DescribeSingleRSVP(context.MainRSVP, true);
 
-            if(context.MainRSVP != null && context.GuestRSVP != null)
+            if (context.MainRSVP != null)
             {
-                res += " with guest " + DescribeSingleRSVP(context.GuestRSVP, false);
+                if (context.GuestRSVP != null && context.GuestRSVP.Person != null && context.GuestRSVP.Person.Attendance.Value)
+                {
+                    res += " with guest " + DescribeSingleRSVP(context.GuestRSVP, false);
+                }
+                else
+                {
+                    res += " with no guest";
+                }
             }
 
             return res;

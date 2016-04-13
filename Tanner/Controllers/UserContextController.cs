@@ -120,5 +120,27 @@ namespace Tanner.Controllers
 
             return View(item);
         }
+
+        [ActionName("ResetRSVP")]
+        public async Task<ActionResult> ResetRSVPAsync(string id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            UserContext item = await DocumentDBRepository<UserContext>.GetItemAsync(id);
+            if (item == null)
+            {
+                return HttpNotFound();
+            }
+
+            item.MainRSVP = null;
+            item.GuestRSVP = null;
+
+            await DocumentDBRepository<UserContext>.UpdateItemAsync(id, item);
+
+            return RedirectToAction("Details", new { id = item.Id });
+        }
     }
 }
