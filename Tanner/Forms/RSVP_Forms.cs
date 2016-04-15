@@ -48,7 +48,7 @@ namespace Tanner.Forms
         [Describe("Tomato Wellington (Vegetarian)")]
         TomatoWellington,
         [EnumMember(Value = "Flank Steak")]
-        [Describe("Argentine style Flank Steak with Bleu cheese, garlic & Worcestershire sauce")]
+        [Describe("Argentine style Flank Steak with bleu cheese, garlic, and Worcestershire sauce")]
         FlankSteak,
         [Describe("Cedar Planked Salmon with Shiitake Mushroom Ragout")]
         Salmon,
