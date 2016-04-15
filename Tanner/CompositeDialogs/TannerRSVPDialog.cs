@@ -13,6 +13,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Tanner.Forms;
 using System.Threading.Tasks;
 using Tanner.Persistence;
+using System.Runtime.Serialization;
 
 namespace Tanner.CompositeDialogs
 {
@@ -270,7 +271,7 @@ namespace Tanner.CompositeDialogs
                     else
                         res += " who is eating ";
 
-                    res += rsvp.DinnerOption.PlateOption.ToString();
+                    res += ToEnumString(rsvp.DinnerOption.PlateOption.Value);
                 }
                 else
                 {
@@ -280,5 +281,22 @@ namespace Tanner.CompositeDialogs
 
             return res;
         }
+
+        // http://stackoverflow.com/questions/10418651/using-enummemberattribute-and-doing-automatic-string-conversions
+        public static string ToEnumString<T>(T instance)
+        {
+            if (!typeof(T).IsEnum)
+                throw new ArgumentException("instance", "Must be enum type");
+            string enumString = instance.ToString();
+            var field = typeof(T).GetField(enumString);
+            if (field != null) // instance can be a number that was cast to T, instead of a named value, or could be a combination of flags instead of a single value
+            {
+                var attr = (EnumMemberAttribute)field.GetCustomAttributes(typeof(EnumMemberAttribute), false).SingleOrDefault();
+                if (attr != null) // if there's no EnumMember attr, use the default value
+                    enumString = attr.Value;
+            }
+            return enumString;
+        }
+
     }
 }

@@ -8,7 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Microsoft.Bot.Builder.FormFlow;
-
+using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace Tanner.Forms
 {
@@ -40,12 +41,17 @@ namespace Tanner.Forms
         }
     }
 
+    [Serializable]
     public enum PlateOptions
     {
-        TomatoWellington /* vegitarian */,
+        [EnumMember(Value = "Tomato Wellington")]
+        [Describe("Tomato Wellington (Vegetarian)")]
+        TomatoWellington,
+        [EnumMember(Value = "Flank Steak")]
+        [Describe("Argentine style Flank Steak with Bleu cheese, garlic & Worcestershire sauce")]
         FlankSteak,
+        [Describe("Cedar Planked Salmon with Shiitake Mushroom Ragout")]
         Salmon,
-        TacosFromDrewsDirtyTacoTruck,
     };
 
     // TODO: Friendly responses

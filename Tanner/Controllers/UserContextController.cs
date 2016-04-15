@@ -1,6 +1,8 @@
-﻿using System;
+﻿using CsvHelper;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -142,5 +144,41 @@ namespace Tanner.Controllers
 
             return RedirectToAction("Details", new { id = item.Id });
         }
+
+        /*
+        // Bulk import via CSV
+
+        [ActionName("ImportData")]
+        public ActionResult ImportDataAsync()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ActionName("OnImportData")]
+        public async Task<ActionResult> OnImportDataAsync(HttpPostedFileBase file)
+        {
+            if (Request.Files.Count == 0)
+                return RedirectToAction("ImportData");
+
+            var importFile = Request.Files.Get(0);
+
+            using (var stream = new StreamReader(importFile.InputStream))
+            {
+                var csv = new CsvReader(stream);
+                var records = csv.GetRecords<UserContext>();
+                while (csv.Read())
+                {
+                    var user_context = new UserContext();
+                    user_context.Name = csv.GetField<string>("Name");
+                    user_context.PhoneNumber = csv.GetField<string>("PhoneNumber");
+                    user_context.GuestAllotted = csv.GetField<bool>("GuestAllotted");
+                    await DocumentDBRepository<UserContext>.CreateItemAsync(user_context);
+                }
+            }
+
+            return RedirectToAction("Index");
+        }
+        */
     }
 }
